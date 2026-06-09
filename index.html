@@ -507,7 +507,7 @@
 
 
         /* ========================================
-           Contact Section
+           Contact Section & Form Notification
            ======================================== */
         .contact-wrapper {
             display: flex;
@@ -588,6 +588,16 @@
             background: #e2e8f0;
             transform: translateY(-1px);
         }
+
+        /* Form Status Messages styling */
+        #form-result {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-weight: 500;
+            display: block;
+        }
+        .text-success { color: #34d399; }
+        .text-error { color: #ef4444; }
 
 
         /* ========================================
@@ -672,7 +682,6 @@
 </head>
 <body>
 
-    <!-- Navigation Bar -->
     <nav>
         <div class="nav-inner">
             <div class="logo">BAK<span>.</span></div>
@@ -687,7 +696,6 @@
         </div>
     </nav>
 
-    <!-- Home / Hero Section -->
     <section id="home">
         <p class="subtitle">Hello, I'm</p>
         <h1>BOILLA <span>ANIL KUMAR</span></h1>
@@ -699,7 +707,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
     <section id="about">
         <h2>About Me</h2>
         <div class="about-container">
@@ -711,7 +718,6 @@
         </div>
     </section>
 
-    <!-- Skills Section -->
     <section id="skills">
         <h2>Skills</h2>
         <div class="skills-grid">
@@ -763,7 +769,6 @@
         </div>
     </section>
 
-    <!-- Education Section -->
     <section id="education">
         <h2>Education</h2>
 
@@ -783,7 +788,6 @@
         </div>
     </section>
 
-    <!-- Resume Section -->
     <section id="resume">
         <h2>Resume</h2>
         <div class="resume-container">
@@ -791,12 +795,10 @@
                 <h3>Curriculum Vitae</h3>
                 <p>Gain insights into my complete academic timeline, hands-on engineering experience, core competencies, and project structures by downloading my updated developer resume.</p>
             </div>
-            <!-- Update the 'href' with the path to your actual resume file (e.g., resume.pdf) -->
             <a href="resume.pdf" target="_blank" download="Boilla_Anil_Kumar_Resume" class="btn btn-primary">Download CV</a>
         </div>
     </section>
 
-    <!-- Projects Section -->
     <section id="projects">
         <h2>Projects</h2>
         <div class="project-card">
@@ -823,7 +825,6 @@
         </div>
     </section>
 
-    <!-- Achievements Section -->
     <section id="achievements">
         <h2>Achievements</h2>
         <div class="achievements-grid">
@@ -846,7 +847,6 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
     <section id="contact">
         <h2>Contact</h2>
         <div class="contact-wrapper">
@@ -861,17 +861,19 @@
                 </p>
             </div>
 
-            <form class="contact-form" action="mailto:anilkumarboilla497@gmail.com" method="post" enctype="text/plain">
+            <form id="portfolio-form" class="contact-form" method="POST">
+                <input type="hidden" name="access_key" value="791b7b80-83b7-466f-872e-ab8db325ec52">
+                
                 <input type="text" name="name" placeholder="Your Name" required>
                 <input type="email" name="email" placeholder="Your Email" required>
                 <textarea name="message" placeholder="Your Message..." required></textarea>
-                <button type="submit">Send Message</button>
+                <button type="submit" id="submit-btn">Send Message</button>
+                <span id="form-result"></span>
             </form>
 
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
         <div class="social-links">
             <a href="https://github.com/Anilkumar457-cm" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -881,20 +883,63 @@
         <p>&copy; 2026 Boilla Anil Kumar. All rights reserved.</p>
     </footer>
 
-    <!-- Browser Refresh Fix Script -->
     <script>
-        // 1. Tell the browser not to remember the old scroll position
+        // Asynchronous Contact Form Post Delivery Process
+        const form = document.getElementById('portfolio-form');
+        const result = document.getElementById('form-result');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // UI adjustments during background transmission operations
+            submitBtn.textContent = "Sending...";
+            submitBtn.disabled = true;
+            result.className = "";
+            result.textContent = "";
+
+            const formData = new FormData(form);
+            const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
+
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: json
+            })
+            .then(async (response) => {
+                let res = await response.json();
+                if (response.status == 200) {
+                    result.className = "text-success";
+                    result.textContent = "Message sent successfully!";
+                    form.reset(); // Clear all text inputs
+                } else {
+                    result.className = "text-error";
+                    result.textContent = res.message || "Something went wrong.";
+                }
+            })
+            .catch(error => {
+                result.className = "text-error";
+                result.textContent = "Network error. Please try again later.";
+            })
+            .then(() => {
+                // Restore primary action elements configuration state
+                submitBtn.textContent = "Send Message";
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Clear out hash variables during initial load events
         if (history.scrollRestoration) {
             history.scrollRestoration = 'manual';
         }
-
-        // 2. On window load, if there's an anchor link in the URL, clear it and jump to top
         window.addEventListener('DOMContentLoaded', () => {
             if (window.location.hash) {
-                // Strips any hash parameter from the address bar seamlessly
                 history.replaceState(null, null, window.location.pathname + window.location.search);
             }
-            // Instantly snap view configuration to the actual initial header coordinates
             window.scrollTo(0, 0);
         });
     </script>
